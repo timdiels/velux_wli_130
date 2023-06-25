@@ -1,11 +1,14 @@
-An attempt to replace an old velux panel (WLI 130) with an ESP32 or Arduino to automate opening/closing velux windows.
-The idea is to send the right signal onto the wires that presumably connect to a WLC 100.
+An attempt to automate opening/closing some old GGL velux windows (1990ish) that are currently controlled by an old
+velux panel (WLI 130).
 
 
 ## Possible solutions
-- Send the same signal onto the wires attached to the WLI 130.
-- Send the right IR signal to the WLI 130. This zip seems to contain IR codes for all the commands
-  https://files.remotecentral.com/view/5562-14340-1/velux_wlx-130_skylight.html#files 
+- Replace the WLI with an ESP. Send the same signal onto the wires connected to the WLC. I figured out the digital
+  signal but no clue how to drive the signal wire to ground to send a low without creating a ton of current; connecting
+  the signal to ground directly causes a short circuit, adding a resistor in between causes it to remain 5V before the
+  resistor, seems the controller has a pull-up without a resistor; yet somehow the input panel manages to do it!
+  https://electronics.stackexchange.com/q/671509/343117
+- Send the right IR signal to the WLI 130.
 - Solder onto the WLI 130 to 'simulate' button presses
   https://homematic.simdorn.net/projekt-velux-dachfenster-rolladensteuerung/
 
