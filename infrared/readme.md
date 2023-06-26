@@ -5,8 +5,8 @@ switches).
 
 
 It's in pronto ccf format (proprietary philips universal remote format, popular on remotecentral). I converted it with
-irscrutiziner (spreadsheet output gives a machine readable csv format), converted the pronto hex codes from it to
-flipper with the node script. Overview of converters:
+irscrutiziner (spreadsheet output gives a machine readable csv format) and converted that with convert.py to a flipper
+remote. Overview of converters:
 
 - [irscrutinizer](http://www.harctoolbox.org/IrScrutinizer.html) gave me more detail than ccf2pulse
 - [This node script](https://gist.github.com/XMB5/a877ab620d812260f2da8380aac050d3) converts pronto hex to a flipper IR
