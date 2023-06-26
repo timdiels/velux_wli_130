@@ -108,7 +108,16 @@ def convert_to_flipper_remote():
             # 0 to 1 fraction for the PWM signal, flipper says it's usually 0.33, it's just a power saving thing. The
             # LED of the WLI responds to the IR with this setting, so it seems fine.
             out.write('duty_cycle: 0.33\n')
+            signal = set_security_code(pulses[:REPEAT_START])
+            repeated_signal = set_security_code(pulses[REPEAT_START:])
+            pulses = signal + repeated_signal
             out.write(f'data: {" ".join(str(abs(pulse)) for pulse in pulses)}\n')
+
+
+def set_security_code(pulses):
+    """Fill the area containing the security code with ones"""
+    ones = (1245, -373) * ((40 - 12) // 2)
+    return pulses[:12] + ones + pulses[40:]
 
 
 def parse_irscrutinizer_csv():
