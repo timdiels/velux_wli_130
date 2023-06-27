@@ -6,6 +6,8 @@ from pathlib import Path
 
 MIDPOINT = 96 // 2 - 1
 REPEAT_START = MIDPOINT + 1
+CONSTANT_AREA_LENGTH = (40 - 12) // 2  # in bits
+SECURITY_CODE_LENGTH = 10  # bits
 
 
 def main():
@@ -97,27 +99,28 @@ def analyse_cmds():
 
 def convert_to_flipper_remote():
     # https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/file_formats/InfraredFileFormats.md
-    with Path('flipper', 'remote.ir').open('w') as out:
-        out.write('Filetype: IR signals file\n')
-        out.write('Version: 1\n')
-        for command, pulses in sorted(parse_irscrutinizer_csv()):
-            out.write('#\n')
-            out.write(f'name: {command}\n')
-            out.write('type: raw\n')
-            out.write('frequency: 32132\n')
-            # 0 to 1 fraction for the PWM signal, flipper says it's usually 0.33, it's just a power saving thing. The
-            # LED of the WLI responds to the IR with this setting, so it seems fine.
-            out.write('duty_cycle: 0.33\n')
-            signal = set_security_code(pulses[:REPEAT_START])
-            repeated_signal = set_security_code(pulses[REPEAT_START:])
-            pulses = signal + repeated_signal
-            out.write(f'data: {" ".join(str(abs(pulse)) for pulse in pulses)}\n')
+    for offset in range(CONSTANT_AREA_LENGTH - SECURITY_CODE_LENGTH + 1):
+        with Path('flipper', f'remote_offset{offset}.ir').open('w') as out:
+            out.write('Filetype: IR signals file\n')
+            out.write('Version: 1\n')
+            for command, pulses in sorted(parse_irscrutinizer_csv()):
+                out.write('#\n')
+                out.write(f'name: {command}\n')
+                out.write('type: raw\n')
+                out.write('frequency: 32132\n')
+                # 0 to 1 fraction for the PWM signal, flipper says it's usually 0.33, it's just a power saving thing. The
+                # LED of the WLI responds to the IR with this setting, so it seems fine.
+                out.write('duty_cycle: 0.33\n')
+                signal = set_security_code(pulses[:REPEAT_START], offset)
+                repeated_signal = set_security_code(pulses[REPEAT_START:], offset)
+                pulses = signal + repeated_signal
+                out.write(f'data: {" ".join(str(abs(pulse)) for pulse in pulses)}\n')
 
 
-def set_security_code(pulses):
+def set_security_code(pulses, offset):
     """Fill the area containing the security code with ones"""
-    ones = (1245, -373) * ((40 - 12) // 2)
-    return pulses[:12] + ones + pulses[40:]
+    ones = (1245, -373) * 10
+    return pulses[:12 + offset * 2] + ones + pulses[40 - (CONSTANT_AREA_LENGTH - SECURITY_CODE_LENGTH - offset) * 2:]
 
 
 def parse_irscrutinizer_csv():
