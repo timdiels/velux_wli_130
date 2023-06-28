@@ -11,17 +11,16 @@
 - Set the security code of your input panel (WLI) to 1011100000 (the 10 dip switches).
 - Turn the power back on.
 
+ESPHome:
+
+- See `esphome/ir_codes.yaml` in this repo for the IR codes in ESPHome config format. See `esphome/example.yaml` for an
+  example of how to use them.
+
 Flipper Zero:
 
-- Copy `flipper/duty_cycles/remote33.ir` to `infrared/` on your SD card. You could use a shorter duty cycle to save
-  power as those also seem to work.
+- Copy `flipper.ir` to `infrared/` on your SD card (rename it to `velux.ir` or something). You could use a shorter duty
+  cycle to save power as those also seem to work.
 - Open it up on the flipper and try it out
-
-Known issues:
-
-- up/down manual causes the motor to operate choppily, it opens a bit, stops, opens a bit, ... Presumably it does not
-  repeat the command pairs fast enough. Probably the last negative pulse is too long; it's much longer than the other
-  ones. Setting it to a shorter off value probably would work.
 
 
 ### Converting the IR codes to other remotes
@@ -47,9 +46,10 @@ remotecentral readme, the security code is 1000000000 but that did not work for 
 
 Each code actually sends the same command twice. The second pulse is sometimes repeated differently (-1214 is repeated
 as -1183 if it's the second pulse). There's a longer pause before the repeated command is sent and a much longer pause
-after the very last command.
+after the very last command (I've edited the much longer pause to be shorter so that manual open/close opens
+continuously instead of stuttering).
 
-All codes use these set of pulses `{-1183, -1214, -373, 436, 1245}`.
+All codes use these set of pulses `{-1183, -1214, -373, 436, 1245}`, not including the long pauses between commands.
 
 Bits are pairs of short/long pulses. 0 is a short-long pair, 1 is a long-short pair and pairs start with a positive
 pulse; negative pulses are just delays during which no IR is sent.

@@ -11,11 +11,13 @@ SECURITY_CODE_LENGTH = 10  # bits
 
 
 def main():
-    analyse_cmds()
-    convert_to_flipper_remote()
+    commands = sorted(parse_irscrutinizer_csv())
+    analyse_cmds(commands)
+    convert_to_flipper_remote(commands)
+    convert_to_esphome_snippet(commands)
 
 
-def analyse_cmds():
+def analyse_cmds(commands):
     cmd_groups = {
         key: [] for key in ('m1', 'm2', 'm3', 'stop', 'up_auto', 'up_manual', 'down_auto', 'down_manual', 'all')
     }
@@ -24,7 +26,7 @@ def analyse_cmds():
     print("Except for the 2nd pulse, if it's -1214, then it's repeated as -1183, else it's the same")
     print("And except for the last pulse of the signal")
     print()
-    for command, pulses in sorted(parse_irscrutinizer_csv()):
+    for command, pulses in commands:
         first_pulses = pulses[:MIDPOINT]
         second_pulses = pulses[MIDPOINT + 1:-1]
         assert first_pulses[1] == second_pulses[1] or (first_pulses[1] == -1214 and second_pulses[1] == -1183)
@@ -97,12 +99,12 @@ def analyse_cmds():
     print(cmd_groups['all'][0][6:20])
 
 
-def convert_to_flipper_remote():
+def convert_to_flipper_remote(commands):
     # https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/file_formats/InfraredFileFormats.md
-    with Path('flipper', f'remote33.ir').open('w') as out:
+    with Path('flipper.ir').open('w') as out:
         out.write('Filetype: IR signals file\n')
         out.write('Version: 1\n')
-        for command, pulses in sorted(parse_irscrutinizer_csv()):
+        for command, pulses in commands:
             out.write('#\n')
             out.write(f'name: {command}\n')
             out.write('type: raw\n')
@@ -111,6 +113,17 @@ def convert_to_flipper_remote():
             # LED of the WLI responds to the IR with this setting, so it seems fine.
             out.write('duty_cycle: 0.33\n')
             out.write(f'data: {" ".join(str(abs(pulse)) for pulse in pulses)}\n')
+
+
+def convert_to_esphome_snippet(commands):
+    with Path('esphome', 'ir_codes.yaml').open('w') as out:
+        out.write(f'# These snippets only send once. Manual commands should be sent repeatedly\n')
+        for command, pulses in commands:
+            out.write(
+                f'\n# {command}\n'
+                f'- remote_transmitter.transmit_raw:\n'
+                f'    code: {list(pulses)}\n'
+            )
 
 
 def parse_irscrutinizer_csv():
