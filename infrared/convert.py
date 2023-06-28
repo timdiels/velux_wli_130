@@ -133,8 +133,14 @@ def parse_irscrutinizer_csv():
 
 
 def parse_formatted_pulses(formatted_pulses: str):
-    # pulses are: on for x time, off for x time, on for ...
-    return tuple(int(pulse) for pulse in formatted_pulses.split())
+    """pulses are: on for x time, off for x time, on for ..."""
+    pulses = list(int(pulse) for pulse in formatted_pulses.split())
+    # The last pulse leaves too much of a delay between repeated command pairs. Result is that manual open/close is
+    # not a continuous motion. Hopefully setting it to twice the delay between commands of a pair will do the trick.
+    # I'm assuming these delays based on what I saw in the wired case but it might as well want the same delay as the
+    # midpoint or quite a bit more even.
+    pulses[-1] = 2 * pulses[MIDPOINT]
+    return tuple(pulses)
 
 
 main()
