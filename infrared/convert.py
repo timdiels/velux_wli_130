@@ -130,6 +130,9 @@ def parse_irscrutinizer_csv():
     with Path('irscrutinizer', 'spreadsheet_2023-06-25_22-42-47.csv').open() as csv_in:
         for line in sorted(csv.reader(csv_in, delimiter=';')):
             command = line[0].replace('&#134', '').replace(' - ', ' ').replace(' ', '_').lower()
+            if 'down' not in command and 'up' not in command:
+                command += '_stop'
+
             assert bool(line[9]) != bool(line[10])  # xor
             pulses = parse_formatted_pulses(line[9] or line[10])
             yield command, pulses
