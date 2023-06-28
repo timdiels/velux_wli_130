@@ -8,6 +8,7 @@ MIDPOINT = 96 // 2 - 1
 REPEAT_START = MIDPOINT + 1
 CONSTANT_AREA_LENGTH = (40 - 12) // 2  # in bits
 SECURITY_CODE_LENGTH = 10  # bits
+CARRIER_FREQUENCY = 32132  # Hz
 
 
 def main():
@@ -108,7 +109,7 @@ def convert_to_flipper_remote(commands):
             out.write('#\n')
             out.write(f'name: {command}\n')
             out.write('type: raw\n')
-            out.write('frequency: 32132\n')
+            out.write(f'frequency: {CARRIER_FREQUENCY}\n')
             # 0 to 1 fraction for the PWM signal, flipper says it's usually 0.33, it's just a power saving thing. The
             # LED of the WLI responds to the IR with this setting, so it seems fine.
             out.write('duty_cycle: 0.33\n')
@@ -123,6 +124,7 @@ def convert_to_esphome_snippet(commands):
                 f'\n# {command}\n'
                 f'- remote_transmitter.transmit_raw:\n'
                 f'    code: {list(pulses)}\n'
+                f'    carrier_frequency: {CARRIER_FREQUENCY}\n'
             )
 
 
