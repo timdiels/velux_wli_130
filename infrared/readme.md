@@ -14,7 +14,8 @@
 ESPHome:
 
 - See `esphome/ir_codes.yaml` in this repo for the IR codes in ESPHome config format. See `esphome/example.yaml` for an
-  example of how to use them.
+  example of how to use them. (ESPHome also has transmit_pronto but it'd be trickier to edit those codes to prevent the
+  manual commands from stuttering)
 
 Flipper Zero:
 
